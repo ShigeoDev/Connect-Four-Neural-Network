@@ -81,6 +81,7 @@ def place(color, col, board):
             playable[col] = 0
         y -= 1
     board[col][y] = color
+    connections(board, col, y, color)
 
 def updateBoard(board, spaces):
     for x in range(0, width):
@@ -97,11 +98,40 @@ def click(x, y):
         place(turn, math.floor((x - bordersize)/100), board)
         turn *= -1
 
-def connections():
+def connections(board, col, row, color):
 
-    for x in range(0,3):
-        for y in range(0, 3):
-            print()
+    connections = []
+    count = 1
+    xdir = 0
+    ydir = 0
+
+    for y in range(-1, 2):
+        print("y:" + str(y))
+        if row + y >= 0 and row + y < height:
+            for x in range(-1, 2):
+                print("x:" + str(x))
+                if col + x >= 0 and col + x < width:
+                    if board[col + x][row + y] == color:
+                        connections.append(2)
+                else:
+                    connections.append(0)
+        else:
+            for i in range(0, 3):
+                connections.append(0)
+    print(connections)
 
 if __name__ == "__main__":
-                main()
+    main()
+
+
+
+
+
+
+
+
+
+
+
+
+
