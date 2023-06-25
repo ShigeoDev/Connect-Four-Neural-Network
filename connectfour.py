@@ -61,19 +61,19 @@ def main():
 
         playable.append(1)
     
-    place(1, 0, board)
+    place(-1, 0, board)
     place(-1, 0, board)
     place(-1, 0, board)
 
-    place(-1, 1, board)
     place(1, 1, board)
     place(-1, 1, board)
+    place(1, 1, board)
 
-    place(-1, 2, board)
     place(-1, 2, board)
     place(1, 2, board)
+    place(1, 2, board)
 
-    connections(1, 1, 1, board)
+    connections(1, 1, board)
 
 
     while True:
@@ -111,8 +111,9 @@ def click(x, y):
         place(turn, math.floor((x - bordersize)/100), board)
         turn *= -1
 
-def connections(col, row, color, board):
+def connections(col, row, board):
 
+    color = board[col][row]
     connections = []
     adjacent = []
     count = 0
@@ -142,16 +143,15 @@ def connections(col, row, color, board):
         else:
             for i in range(0, 3):
                 adjacent.append(0)
-    print(adjacent)
+
+    for i in range(0, 4):
+        connections.append(adjacent[i] + adjacent[len(adjacent) - 1 - i] + 1) 
+    
+    print(connections)
 
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
 
 
 
