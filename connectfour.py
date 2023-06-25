@@ -30,7 +30,7 @@ def main():
         boardcol = []
         spacecol = []
 
-        for y in reversed(range(0, height)):
+        for y in range(0, height):
 
             circle = turtle.Turtle()
             circle.penup()
@@ -60,6 +60,20 @@ def main():
     for x in range(0, width):
 
         playable.append(1)
+    
+    place(1, 0, board)
+    place(-1, 0, board)
+    place(-1, 0, board)
+
+    place(-1, 1, board)
+    place(1, 1, board)
+    place(-1, 1, board)
+
+    place(-1, 2, board)
+    place(-1, 2, board)
+    place(1, 2, board)
+
+    connections(1, 1, 1, board)
 
 
     while True:
@@ -73,15 +87,14 @@ def main():
     time.sleep(3)
 
 def place(color, col, board):
-    y = 5
+    y = 0
     while board[col][y] != 0:
-        if y == 0:
+        if y == 5:
             break
-        elif y == 1:
+        elif y == 4:
             playable[col] = 0
-        y -= 1
+        y += 1
     board[col][y] = color
-    connections(board, col, y, color)
 
 def updateBoard(board, spaces):
     for x in range(0, width):
@@ -98,27 +111,39 @@ def click(x, y):
         place(turn, math.floor((x - bordersize)/100), board)
         turn *= -1
 
-def connections(board, col, row, color):
+def connections(col, row, color, board):
 
     connections = []
-    count = 1
+    adjacent = []
+    count = 0
     xdir = 0
     ydir = 0
 
     for y in range(-1, 2):
-        print("y:" + str(y))
         if row + y >= 0 and row + y < height:
             for x in range(-1, 2):
-                print("x:" + str(x))
-                if col + x >= 0 and col + x < width:
-                    if board[col + x][row + y] == color:
-                        connections.append(2)
-                else:
-                    connections.append(0)
+                if x != 0 or y != 0:
+                    if col + x >= 0 and col + x < width:
+                        if board[col + x + xdir][row + y + ydir] == color:
+                            while board[col + x + xdir][row + y + ydir] == color:
+                                count += 1
+                                xdir += x
+                                ydir += y
+                                if col + x + xdir < 0 or col + x + xdir >= width or row + y + ydir < 0 or row + y + ydir >= height:
+                                    break
+                            adjacent.append(count)
+                            xdir = 0
+                            ydir = 0
+                            count = 0 
+                        else:
+                                adjacent.append(0)
+                    else:
+                        adjacent.append(0)
         else:
             for i in range(0, 3):
-                connections.append(0)
-    print(connections)
+                adjacent.append(0)
+    print(adjacent)
+
 
 if __name__ == "__main__":
     main()
