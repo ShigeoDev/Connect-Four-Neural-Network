@@ -172,17 +172,22 @@ def connections(col, row, board):
 # Checking for what potentials are available
 def potentials(col, row, board):
 
+    # Temp arrays to store info on what pieces are where
     potentiallines = []
     halflines = []
     xdir = 0
     ydir = 0
     color = board[col][row]
 
+    # Double for loop to go through all directions away from piece
     for y in range(-1, 2):
         for x in range(-1, 2):
             temp = []
+            # Making sure its not the piece itself
             if x != 0 or y != 0:
+                # While it is in bounds
                 while col + x + xdir >= 0 and col + x + xdir < width and row + y + ydir >= 0 and row + y + ydir < height:
+                    # Add the color info to the array
                     temp.append(board[col + x + xdir][row + y + ydir])
                     xdir += x
                     ydir += y
@@ -190,48 +195,60 @@ def potentials(col, row, board):
                 xdir = 0
                 ydir = 0
 
+                # Add array of colors to halflines
                 halflines.append(temp)
 
+    # Adding the halflines together to make for bidirectional lines from the piece
     for i in range(0, 4):
         inline = []
+        # Reversing the order of the first array because it is collected in the opposite direction, then adding it the inline
         for j in range(0, len(halflines[i])):
             inline.append(halflines[i][len(halflines[i]) - 1 - j])
+        # Adding the piece itself to the array
         inline.append(color)
+        # Adding the other direction array into inline
         for k in range(0, len(halflines[len(halflines) - 1 - i])):
             inline.append(halflines[len(halflines) - 1 - i][k])
+
+        # Collecting all the arrays together
         potentiallines.append(inline)
 
     # 3rd potential line is wrong direction because of where it is located, needs to go left to right to correspond to columns
     potentiallines[2].reverse()
-
-    print(potentiallines)
          
+    # Initializing new variables for next loops
     count = 0
     potentials = 0
     zeroused = 0
 
-
+    # For loop to go through the potential lines array
     for i in range(0, 4):
         j = 0
+        # While loops to go through the individual bidirectional arrays to count the pieces in a row
         while j < len(potentiallines[i]):
-            print("j: " + str(j))
+            # If it is the same color add to count
             if potentiallines[i][j] == color:
                 count += 1
+            # If it is empty and no other empty spaces have appeared 
             if potentiallines[i][j] == 0 and zeroused == 0:
                 zeroused = 1
                 count += 1
+            # Once it reaches four
             if count == 4:
+                # In rare case it makes two potentials have to double check spot
                 j -= 1
-                print("j after " + str(j))
+                # Add one to potentials
                 potentials += 1
+                # Reset zeroused
                 zeroused = 0
+                # Reset Count
                 count = 0
+            # Go to next space
             j += 1
-            print("count: " + str(count))
+        # Reset for next array
         count = 0
         zeroused = 0
 
-    print(potentials)
     return(potentials)
 
 if __name__ == "__main__":
