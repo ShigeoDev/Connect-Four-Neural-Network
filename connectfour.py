@@ -71,17 +71,14 @@ def main():
         playable.append(1)
     
 
+
     place(1, 0, board)
-    place(-1, 0, board)
     place(1, 1, board)
-    place(1, 1, board)
+    place(1, 3, board)
+    place(1, 5, board)
+    place(1, 6, board)
 
-    place(1, 1, board)
-    place(-1, 1, board)
-    place(1, 2, board)
-    place(1, 2, board)
-
-    potentials(0, 0, board)
+    potentials(3, 0, board)
 
     # Constantly checking for clicks
     while True:
@@ -175,30 +172,67 @@ def connections(col, row, board):
 # Checking for what potentials are available
 def potentials(col, row, board):
 
-    potentials = []
+    potentiallines = []
+    halflines = []
     xdir = 0
     ydir = 0
     color = board[col][row]
 
     for y in range(-1, 2):
         for x in range(-1, 2):
-            connections = []
+            temp = []
             if x != 0 or y != 0:
-                print(x)
-                print(y)
-                print()
                 while col + x + xdir >= 0 and col + x + xdir < width and row + y + ydir >= 0 and row + y + ydir < height:
-                    connections.append(board[col + x + xdir][row + y + ydir])
+                    temp.append(board[col + x + xdir][row + y + ydir])
                     xdir += x
                     ydir += y
                 
                 xdir = 0
                 ydir = 0
 
-                potentials.append(connections)
-                
-    print(potentials)
+                halflines.append(temp)
 
+    for i in range(0, 4):
+        inline = []
+        for j in range(0, len(halflines[i])):
+            inline.append(halflines[i][len(halflines[i]) - 1 - j])
+        inline.append(color)
+        for k in range(0, len(halflines[len(halflines) - 1 - i])):
+            inline.append(halflines[len(halflines) - 1 - i][k])
+        potentiallines.append(inline)
+
+    # 3rd potential line is wrong direction because of where it is located, needs to go left to right to correspond to columns
+    potentiallines[2].reverse()
+
+    print(potentiallines)
+         
+    count = 0
+    potentials = 0
+    zeroused = 0
+
+
+    for i in range(0, 4):
+        j = 0
+        while j < len(potentiallines[i]):
+            print("j: " + str(j))
+            if potentiallines[i][j] == color:
+                count += 1
+            if potentiallines[i][j] == 0 and zeroused == 0:
+                zeroused = 1
+                count += 1
+            if count == 4:
+                j -= 1
+                print("j after " + str(j))
+                potentials += 1
+                zeroused = 0
+                count = 0
+            j += 1
+            print("count: " + str(count))
+        count = 0
+        zeroused = 0
+
+    print(potentials)
+    return(potentials)
 
 if __name__ == "__main__":
     main()
