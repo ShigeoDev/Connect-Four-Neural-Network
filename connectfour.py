@@ -139,7 +139,7 @@ def main():
 def place(color, col, boardnum):
     y = 0
     board = games[boardnum]
-    if playablegame:
+    if playablegame[boardnum]:
         while board[col][y] != 0 and playablecol[boardnum][col]:
             if y == 5:
                 break
@@ -164,7 +164,7 @@ def updateBoard(board, spaces):
 def click(x, y):
     global turn
 
-    if playablecol[0][math.floor((x - bordersize)/100)]:
+    if playablecol[0][math.floor((x - bordersize)/100)] and playablegame[0]:
         place(turn, math.floor((x - bordersize)/100), 0)
         turn *= -1
     
