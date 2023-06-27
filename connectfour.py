@@ -20,13 +20,20 @@ turtle.tracer(0)
 height = 6
 width = 7
 
+# Multi game variables
+amountOfGames = 1
+
 # Arrays to store data on color and objects
-board = []
+games = []
 spaces = []
 arrow = []
-playable = []
+playablecol = []
+playablegame = []
+wins = []
 redpotentials = []
 yellowpotentials = []
+redconnections = []
+yellowconnections = []
 
 # Neural network components
 nodes = 8
@@ -39,12 +46,24 @@ neurons = []
 # 1 is Red, -1 is Yellow
 turn = 1
 
+# If the game is played by person
+clickable = 1
+
 def main():
+
+    # Creating multiple games
+    for i in range(0, amountOfGames):
+        board = []
+        for x in range(0, width):
+            boardcol = []
+            for y in range(0, height):
+                boardcol.append(0)
+            board.append(boardcol)
+        games.append(board)
 
     # Creating board and spaces with turtles
     for x in range(0, width):
 
-        boardcol = []
         spacecol = []
 
         for y in range(0, height):
@@ -57,9 +76,7 @@ def main():
             circle.shapesize(4, 4, 4)
             circle.setpos(x * 100 + 50 + bordersize - 5, y * 100 + 50 + bordersize - 5)
             spacecol.append(circle)
-            boardcol.append(0)
 
-        board.append(boardcol)
         spaces.append(spacecol)
 
     # Creating clickable triangles
@@ -75,47 +92,64 @@ def main():
         triangle.setpos(x * 100 + 50 + bordersize - 5, 650)
         arrow.append(triangle)
 
-    # Making all the columns playable
-    for x in range(0, width):
+    # Making all the columns and games playable & setting all wins to 0
+    for i in range(0, amountOfGames):
+        temp = []
+        playablegame.append(1)
+        wins.append(0)
+        for x in range(0, width):
+            temp.append(1)
+        playablecol.append(temp)
 
-        playable.append(1)
+    for i in range(0, amountOfGames):
+        redtemp = []
+        yellowtemp = []
+        for i in range(0, width):
+            redtempcolumns = []
+            yellowtempcolumns = []
+            for j in range(0, height):
+                redtempcolumns.append(0)
+                yellowtempcolumns.append(0)
+            redtemp.append(redtempcolumns)
+            yellowtemp.append(yellowtempcolumns)
+        redpotentials.append(redtemp)
+        yellowpotentials.append(yellowtemp)
 
-    for i in range (0, width):
-        redtempcolumns = []
-        yellowtempcolumns = []
-        for j in range(0, height):
-            redtempcolumns.append(0)
-            yellowtempcolumns.append(0)
-        redpotentials.append(redtempcolumns)
-        yellowpotentials.append(yellowtempcolumns)
+    for i in range(0, amountOfGames):
+        redtemp = []
+        yellowtemp = []
+        redconnections.append(redtemp)
+        yellowconnections.append(yellowtemp)
     
     
 
     # Constantly checking for clicks
-    while True:
-        for i in range(0, len(arrow)):
-            arrow[i].onclick(click)
-        updateBoard(board, spaces)
-        turtle.update()
+    if clickable:
+        while True:
+            for i in range(0, len(arrow)):
+                arrow[i].onclick(click)
+            updateBoard(games[0], spaces)
+            turtle.update()
     
-
-
     turtle.update()
 
     time.sleep(3)
 
 # Function to place piece in certain column
-def place(color, col, board):
+def place(color, col, boardnum):
     y = 0
-    while board[col][y] != 0:
-        if y == 5:
-            break
-        elif y == 4:
-            playable[col] = 0
-        y += 1
-    board[col][y] = color
+    board = games[boardnum]
+    if playablegame:
+        while board[col][y] != 0 and playablecol[boardnum][col]:
+            if y == 5:
+                break
+            elif y == 4:
+                playablecol[boardnum][col] = 0
+            y += 1
+        board[col][y] = color
 
-    findPotentials(col, y, board)
+    connections(col, y, boardnum)
+    findPotentials(col, y, boardnum)
 
 # Updating the turtles colors
 def updateBoard(board, spaces):
@@ -130,8 +164,8 @@ def updateBoard(board, spaces):
 def click(x, y):
     global turn
 
-    if playable[math.floor((x - bordersize)/100)]:
-        place(turn, math.floor((x - bordersize)/100), board)
+    if playablecol[0][math.floor((x - bordersize)/100)]:
+        place(turn, math.floor((x - bordersize)/100), 0)
         turn *= -1
     
     for i in range(0, width):
@@ -141,8 +175,9 @@ def click(x, y):
             arrow[i].color("black", "yellow")
 
 # Checking for how many connected pieces in all directions of one piece
-def connections(col, row, board):
+def connections(col, row, boardnum):
 
+    board = games[boardnum]
     color = board[col][row]
     connections = []
     adjacent = []
@@ -186,12 +221,23 @@ def connections(col, row, board):
     for i in range(0, 4):
         connections.append(adjacent[i] + adjacent[len(adjacent) - 1 - i] + 1) 
     
-    print(connections)
+    # If four in a row is detected, game is not playable anymore
+    for i in range(0,4):
+        if connections[i] == 4:
+            playablegame[boardnum] = 0
+            wins[boardnum] = 1
+    
+    if color == 1:
+        redconnections[boardnum].append(connections)
+    elif color == -1:
+        yellowconnections[boardnum].append(connections)
+
 
 # Checking for what potentials are available
-def findPotentials(col, row, board):
+def findPotentials(col, row, boardnum):
 
     # Temp arrays to store info on what pieces are where
+    board = games[boardnum]
     potentiallines = []
     halflines = []
     halfy = []
@@ -294,9 +340,9 @@ def findPotentials(col, row, board):
             if count == 4:
                 # Storing the potential to the potential array
                 if color == 1:
-                    redpotentials[spacex[zerox][zeroy]][spacey[zerox][zeroy]] = 1
+                    redpotentials[boardnum][spacex[zerox][zeroy]][spacey[zerox][zeroy]] = 1
                 elif color == -1:
-                    yellowpotentials[spacex[zerox][zeroy]][spacey[zerox][zeroy]] = -1
+                    yellowpotentials[boardnum][spacex[zerox][zeroy]][spacey[zerox][zeroy]] = -1
                 # Go back 3 spaces to check for more potentials right after
                 j -= 3
                 # Reset zeroused
@@ -308,12 +354,35 @@ def findPotentials(col, row, board):
         # Reset for next array
         count = 0
         zeroused = 0
-    
-    if color == 1:
-        print(redpotentials)
-    elif color == -1:
-        print(yellowpotentials)
 
+def getPoints(color, boardnum, win):
+    board = games[boardnum] 
+    points = 0
+    doubleconnection = 2
+    tripleconnection = 10
+    potentialpoints = 100
+    if win:
+        points += 10000
+    if color:
+        potentials = redpotentials[boardnum]
+        connections = redconnections[boardnum]
+    else:
+        potentials = yellowpotentials[boardnum]
+        connections = yellowconnections[boardnum]
+    
+    for i in connections:
+        for j in range(0, 4):
+            if connections[i][j] == 3:
+                points += tripleconnection
+            elif connections[i][j] == 2:
+                points += doubleconnection
+    
+    for x in potentials:
+        for y in potentials[0]:
+            if potentials[x][y] == 1:
+                points += potentialpoints
+    
+    return points
 
 if __name__ == "__main__":
     main()
