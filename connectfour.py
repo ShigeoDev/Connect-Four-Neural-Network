@@ -25,6 +25,16 @@ board = []
 spaces = []
 arrow = []
 playable = []
+redpotentials = []
+yellowpotentials = []
+
+# Neural network components
+nodes = 8
+layers = 2
+
+output = []
+weights = []
+neurons = []
 
 # 1 is Red, -1 is Yellow
 turn = 1
@@ -59,7 +69,7 @@ def main():
         triangle.penup()
         triangle.shape("triangle")
         triangle.speed(0)
-        triangle.color("black", "green")
+        triangle.color("black", "red")
         triangle.shapesize(4, 2, 2)
         triangle.setheading(270)
         triangle.setpos(x * 100 + 50 + bordersize - 5, 650)
@@ -69,16 +79,17 @@ def main():
     for x in range(0, width):
 
         playable.append(1)
+
+    for i in range (0, width):
+        redtempcolumns = []
+        yellowtempcolumns = []
+        for j in range(0, height):
+            redtempcolumns.append(0)
+            yellowtempcolumns.append(0)
+        redpotentials.append(redtempcolumns)
+        yellowpotentials.append(yellowtempcolumns)
     
-
-
-    place(1, 0, board)
-    place(1, 1, board)
-    place(1, 3, board)
-    place(1, 5, board)
-    place(1, 6, board)
-
-    potentials(3, 0, board)
+    
 
     # Constantly checking for clicks
     while True:
@@ -104,6 +115,8 @@ def place(color, col, board):
         y += 1
     board[col][y] = color
 
+    findPotentials(col, y, board)
+
 # Updating the turtles colors
 def updateBoard(board, spaces):
     for x in range(0, width):
@@ -120,6 +133,12 @@ def click(x, y):
     if playable[math.floor((x - bordersize)/100)]:
         place(turn, math.floor((x - bordersize)/100), board)
         turn *= -1
+    
+    for i in range(0, width):
+        if turn == 1:
+            arrow[i].color("black", "red")
+        if turn == -1:
+            arrow[i].color("black", "yellow")
 
 # Checking for how many connected pieces in all directions of one piece
 def connections(col, row, board):
@@ -170,11 +189,15 @@ def connections(col, row, board):
     print(connections)
 
 # Checking for what potentials are available
-def potentials(col, row, board):
+def findPotentials(col, row, board):
 
     # Temp arrays to store info on what pieces are where
     potentiallines = []
     halflines = []
+    halfy = []
+    halfx = []
+    spacey = []
+    spacex = []
     xdir = 0
     ydir = 0
     color = board[col][row]
@@ -183,12 +206,17 @@ def potentials(col, row, board):
     for y in range(-1, 2):
         for x in range(-1, 2):
             temp = []
+            temp2 = [] 
+            temp3 = []
             # Making sure its not the piece itself
             if x != 0 or y != 0:
                 # While it is in bounds
                 while col + x + xdir >= 0 and col + x + xdir < width and row + y + ydir >= 0 and row + y + ydir < height:
                     # Add the color info to the array
                     temp.append(board[col + x + xdir][row + y + ydir])
+                    # Storing data on what height the pieces are
+                    temp2.append(row + y + ydir)
+                    temp3.append(col + x + xdir)
                     xdir += x
                     ydir += y
                 
@@ -197,29 +225,46 @@ def potentials(col, row, board):
 
                 # Add array of colors to halflines
                 halflines.append(temp)
+                # Add the arrays to the halfx and halfy
+                halfy.append(temp2)
+                halfx.append(temp3)
 
-    # Adding the halflines together to make for bidirectional lines from the piece
+    # Adding the halflines/halfy/halfx together to make for bidirectional lines from the piece
     for i in range(0, 4):
         inline = []
+        connectedy = []
+        connectedx = []
         # Reversing the order of the first array because it is collected in the opposite direction, then adding it the inline
         for j in range(0, len(halflines[i])):
             inline.append(halflines[i][len(halflines[i]) - 1 - j])
+            connectedy.append(halfy[i][len(halfy[i]) - 1 - j])
+            connectedx.append(halfx[i][len(halfx[i]) - 1 - j])
         # Adding the piece itself to the array
         inline.append(color)
+        connectedy.append(row)
+        connectedx.append(col)
         # Adding the other direction array into inline
         for k in range(0, len(halflines[len(halflines) - 1 - i])):
             inline.append(halflines[len(halflines) - 1 - i][k])
+            connectedy.append(halfy[len(halfy) - 1 - i][k])
+            connectedx.append(halfx[len(halfx) - 1 - i][k])
 
         # Collecting all the arrays together
         potentiallines.append(inline)
+        spacey.append(connectedy)
+        spacex.append(connectedx)
+    
 
     # 3rd potential line is wrong direction because of where it is located, needs to go left to right to correspond to columns
     potentiallines[2].reverse()
-         
+    spacey[2].reverse()
+    spacex[2].reverse()
+
     # Initializing new variables for next loops
     count = 0
-    potentials = 0
     zeroused = 0
+    zerox = 0
+    zeroy = 0
 
     # For loop to go through the potential lines array
     for i in range(0, 4):
@@ -229,16 +274,31 @@ def potentials(col, row, board):
             # If it is the same color add to count
             if potentiallines[i][j] == color:
                 count += 1
+            # If it reaches the opposite color reset the count
+            elif potentiallines[i][j] == -color:
+                count = 0
             # If it is empty and no other empty spaces have appeared 
-            if potentiallines[i][j] == 0 and zeroused == 0:
-                zeroused = 1
-                count += 1
+            if potentiallines[i][j] == 0:
+                if zeroused == 0:
+                    zeroused = 1
+                    zeroy = j
+                    zerox = i
+                    count += 1
+                # If zero has been used and it reaches another zero, reset the count to one and set the zero location
+                elif zeroused == 1:
+                    zeroused == 0
+                    zeroy = j
+                    zerox = i
+                    count == 1
             # Once it reaches four
             if count == 4:
-                # In rare case it makes two potentials have to double check spot
-                j -= 1
-                # Add one to potentials
-                potentials += 1
+                # Storing the potential to the potential array
+                if color == 1:
+                    redpotentials[spacex[zerox][zeroy]][spacey[zerox][zeroy]] = 1
+                elif color == -1:
+                    yellowpotentials[spacex[zerox][zeroy]][spacey[zerox][zeroy]] = -1
+                # Go back 3 spaces to check for more potentials right after
+                j -= 3
                 # Reset zeroused
                 zeroused = 0
                 # Reset Count
@@ -248,8 +308,12 @@ def potentials(col, row, board):
         # Reset for next array
         count = 0
         zeroused = 0
+    
+    if color == 1:
+        print(redpotentials)
+    elif color == -1:
+        print(yellowpotentials)
 
-    return(potentials)
 
 if __name__ == "__main__":
     main()
