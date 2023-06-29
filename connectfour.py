@@ -47,7 +47,7 @@ neurons = []
 turn = 1
 
 # If the game is played by person
-clickable = 1
+clickable = 0
 
 def main():
 
@@ -121,8 +121,7 @@ def main():
         redconnections.append(redtemp)
         yellowconnections.append(yellowtemp)
     
-    
-
+     
     # Constantly checking for clicks
     if clickable:
         while True:
