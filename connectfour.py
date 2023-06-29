@@ -21,7 +21,7 @@ height = 6
 width = 7
 
 # Multi game variables
-amountOfGames = 1
+amountOfGames = 2
 
 # Arrays to store data on color and objects
 games = []
@@ -36,9 +36,10 @@ redconnections = []
 yellowconnections = []
 
 # Neural network components
-nodes = 8
+nodes = 4
 layers = 2
 
+input = []
 output = []
 weights = []
 neurons = []
@@ -101,6 +102,7 @@ def main():
             temp.append(1)
         playablecol.append(temp)
 
+    # 3D Potential arrays, 1 for each player per game
     for i in range(0, amountOfGames):
         redtemp = []
         yellowtemp = []
@@ -115,13 +117,46 @@ def main():
         redpotentials.append(redtemp)
         yellowpotentials.append(yellowtemp)
 
+    # Connection array for every game
     for i in range(0, amountOfGames):
         redtemp = []
         yellowtemp = []
         redconnections.append(redtemp)
         yellowconnections.append(yellowtemp)
+
+    # Making input vector for every game
+    for i in range(0, amountOfGames):
+        temp = []
+        for j in range(0, width):
+            for j in range(0, height):
+                temp.append(0)
+        input.append(temp)
+
+    # Making neurons for each game
+    for i in range(0, amountOfGames):
+        temp = []
+        for j in range(0, layers):
+            temp2 = []
+            for k in range(0, nodes):
+                temp2.append(0)
+            temp.append(temp2)
+        neurons.append(temp)
     
+<<<<<<< HEAD
      
+=======
+    # Making outputs for each game, colums 0,6 for placing
+    for i in range(0, amountOfGames):
+        temp = []
+        for j in range(0, 7):
+            temp.append(0)
+        output.append(temp)
+
+    print(input)
+    print(neurons)
+    print(output)
+
+>>>>>>> d7193dab353de43060f3b6a4eb3927304fe058a5
     # Constantly checking for clicks
     if clickable:
         while True:
