@@ -21,7 +21,8 @@ height = 6
 width = 7
 
 # Multi game variables
-amountOfGames = 2
+gamecount = 1
+playercount = gamecount * 2
 
 # Arrays to store data on color and objects
 games = []
@@ -53,7 +54,7 @@ clickable = 0
 def main():
 
     # Creating multiple games
-    for i in range(0, amountOfGames):
+    for i in range(0, playercount):
         board = []
         for x in range(0, width):
             boardcol = []
@@ -94,7 +95,7 @@ def main():
         arrow.append(triangle)
 
     # Making all the columns and games playable & setting all wins to 0
-    for i in range(0, amountOfGames):
+    for i in range(0, playercount):
         temp = []
         playablegame.append(1)
         wins.append(0)
@@ -102,8 +103,8 @@ def main():
             temp.append(1)
         playablecol.append(temp)
 
-    # 3D Potential arrays, 1 for each player per game
-    for i in range(0, amountOfGames):
+    # 3D Potential arrays, 1 for each player
+    for i in range(0, playercount):
         redtemp = []
         yellowtemp = []
         for i in range(0, width):
@@ -117,23 +118,23 @@ def main():
         redpotentials.append(redtemp)
         yellowpotentials.append(yellowtemp)
 
-    # Connection array for every game
-    for i in range(0, amountOfGames):
+    # Connection array for every player
+    for i in range(0, playercount):
         redtemp = []
         yellowtemp = []
         redconnections.append(redtemp)
         yellowconnections.append(yellowtemp)
 
-    # Making input vector for every game
-    for i in range(0, amountOfGames):
+    # Making input vector for every player
+    for i in range(0, playercount):
         temp = []
         for j in range(0, width):
             for j in range(0, height):
                 temp.append(0)
         input.append(temp)
 
-    # Making neurons for each game
-    for i in range(0, amountOfGames):
+    # Making neurons for each player
+    for i in range(0, playercount):
         temp = []
         for j in range(0, layers):
             temp2 = []
@@ -142,11 +143,8 @@ def main():
             temp.append(temp2)
         neurons.append(temp)
     
-<<<<<<< HEAD
-     
-=======
-    # Making outputs for each game, colums 0,6 for placing
-    for i in range(0, amountOfGames):
+    # Making outputs for each player, colums 0,6 for placing
+    for i in range(0, playercount):
         temp = []
         for j in range(0, 7):
             temp.append(0)
@@ -156,7 +154,6 @@ def main():
     print(neurons)
     print(output)
 
->>>>>>> d7193dab353de43060f3b6a4eb3927304fe058a5
     # Constantly checking for clicks
     if clickable:
         while True:
@@ -388,6 +385,10 @@ def findPotentials(col, row, boardnum):
         # Reset for next array
         count = 0
         zeroused = 0
+
+# Cross examine opposite potential with board to locate blocks
+def blocks():
+    print()
 
 def getPoints(color, boardnum, win):
     board = games[boardnum] 
